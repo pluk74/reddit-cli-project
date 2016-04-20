@@ -12,5 +12,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ziad Saab <ziad.saab@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pluk74/reddit-cli-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pluk74/reddit-cli-project/issues"
+  },
+  "homepage": "https://github.com/pluk74/reddit-cli-project#readme"
 }
