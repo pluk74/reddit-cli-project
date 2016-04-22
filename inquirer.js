@@ -1,10 +1,10 @@
-var redditGets = require("./reddit")
+var redditFunctions = require("./reddit")
 var request = require('request');
 const imageToAscii = require("image-to-ascii");
 var wrap = require('word-wrap');
 var inquirer = require('inquirer');
-
-main()
+//var arrOfSubreddits = [];
+//main()
 
 function main() {
 
@@ -12,18 +12,24 @@ function main() {
         type: 'list',
         name: 'menu',
         message: 'What do you want to do?',
-        choices: mainMenu()
+        choices: mainMenuOptions()
     }).then(function(choice) {
         switch (choice.menu) {
             case "HOMEPAGE":
-                
-                redditGets.getHomepage(postSelectableList);
+
+                redditFunctions.getHomepage(printSelectableListOfPosts);
                 break;
             case "SUBREDDIT":
-                console.log(choice.menu);
+                //console.log(choice.menu);
+                subredditMenu();
                 break;
             case "SUBREDDITS":
-                console.log(choice.menu);
+                redditFunctions.getSubreddits(function(obj) {
+                    obj.data.children.forEach(function(element) {
+                        console.log(element.data.display_name);
+                    });
+                    main();
+                });
                 break;
             case "EXIT":
                 return;
@@ -32,8 +38,7 @@ function main() {
 }
 
 
-
-function mainMenu() {
+function mainMenuOptions() {
     var mainMenuChoices = [{
             name: 'Show homepage',
             value: 'HOMEPAGE'
@@ -49,58 +54,103 @@ function mainMenu() {
         }
 
     ];
-    return mainMenuChoices
+    return mainMenuChoices;
 }
 
 
-function postSelectableList(obj) {
 
-  
-  var arr = [];
-  obj.data.children.forEach(function(element, i) {
-      var listPosts = {
+function printSelectableListOfPosts(obj) {
 
-        name: element.data.title + " | " + element.data.url + " | " + element.data.author + " | ",
-        value: i
-      }
-      arr.push(listPosts);
-      arr.push(new inquirer.Separator());
+    var arr = [];
+    obj.data.children.forEach(function(element, i) {
+            var listPosts = {
+
+                name: element.data.title + " | " + element.data.url + " | " + element.data.author + " | ",
+                value: i
+            };
+            arr.push(listPosts);
+            arr.push(new inquirer.Separator());
+        }
+
+    );
+
+    inquirer.prompt({
+        type: 'list',
+        name: 'menu',
+        message: 'Choose a post',
+        choices: arr
+    }).then(function(choicePost) {
+        console.log("\33c");
+
+        redditFunctions.dispImage(obj, choicePost, function(image) {
+            console.log(image);
+            redditFunctions.dispPostDetails(obj, choicePost);
+            main();
+        });
+
+
+    });
+
+}
+
+
+function subredditMenu() {
+
+    redditFunctions.getSubreddits(function(res) {
+        inquirer.prompt({
+            type: 'list',
+            name: 'menu',
+            message: "Choose a subreddit",
+            choices: redditFunctions.subredditMenuChoices(res)
+        }).then(function(choiceSub) {
+            console.log(choiceSub.menu);
+            if (choiceSub.menu !== "MAIN") {
+              redditFunctions.getSubreddit(choiceSub.menu, printSelectableListOfPosts);
+            }
+
+            main();
+        });
+    });
+}
+
+
+redditFunctions.getComments("AskReddit","4g07id",function(result) {
+    //console.log(result);
+    //var arr = [];
+    result[1].data.children.forEach(function(element) {
+        console.log(element.data.body);
+        console.log(isEmpty(element.data.replies));
+         if(isEmpty(element.data.replies)) {
+            console.log("yes, there are replices");
+         }
+         else {
+            console.log("no, there are no replies");
+             
+         }
+    });
+});
+
+function createCommentThreads (obj) {
+    
+}
+
+//function to check if there are replies in a comment thread
+function isEmpty(obj) {
+
+    // null and undefined are "empty"
+    if (obj == null) return false;
+
+    // Assume if it has a length property with a non-zero value
+    // that that property is correct.
+    if (obj.length > 0)    return true;
+    if (obj.length === 0)  return false;
+
+    // Otherwise, does it have any properties of its own?
+    // Note that this doesn't handle
+    // toString and valueOf enumeration bugs in IE < 9
+    for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) return true;
     }
 
-  );
-    console.log(arr);
-  inquirer.prompt({
-    type: 'list',
-    name: 'menu',
-    message: 'Choose a post',
-    choices: arr
-  }).then(function(choicePost) {
-      console.log(choicePost);
-      console.log("\33c");
-      dispImage(obj,choicePost);
-
-  }); 
-  
-}
-
-
-
-function dispImage (obj,choicePost) {
-  console.log("function dispImage");
-// if (obj.data.children[choicePost.menu].data.thumbnail) //{
-      imageToAscii(obj.data.children[choicePost.menu].data.thumbnail, {
-        colored: true,
-        bg : true,
-        fg : true,
-        size: {
-          height: 30,
-          width: 30
-        }
-      }, (err, converted) => {
-        console.log(err || converted);
-      });
-      
-    // console.log(obj.data.children[choicePost.menu].data.subreddit,obj.data.children[choicePost.menu].data.id);
-      
-  // }
+    return false;
 }

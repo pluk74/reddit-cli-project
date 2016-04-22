@@ -63,6 +63,89 @@ function getSubreddits(callback) {
 
 }
 
+function dispPostDetails(obj, choicePost) {
+  var post = obj.data.children[choicePost.menu].data;
+  console.log("Title: " + post.title);
+  console.log("URL: " + post.url);
+  console.log("Author: " + post.author);
+  console.log("Subreddit: " + post.subreddit);
+  console.log(post.selftext);
+  getComments(post.subreddit, post.id, (function(result) {
+    console.log(result);
+  }))
+
+}
+
+function dispImage(obj, choicePost, callback) {
+  //console.log("function dispImage");
+  if (obj.data.children[choicePost.menu].data.thumbnail) {
+    imageToAscii(obj.data.children[choicePost.menu].data.thumbnail, {
+      pxwidth: 1,
+      colored: true,
+      bg: true,
+      fg: true,
+      size: {
+        height: 30,
+        width: 30
+      }
+    }, (err, converted) => {
+      callback(err || converted);
+    });
+
+    // console.log(obj.data.children[choicePost.menu].data.subreddit,obj.data.children[choicePost.menu].data.id);
+
+  }
+}
+
+
+function displaySubredditList(obj, callback) {
+  //console.log(obj.data.children[1].data.display_name);
+  //var arr = [];
+
+  obj.data.children.forEach(function(element) {
+    callback(element.data.display_name);
+  });
+}
+
+
+function subredditMenuChoices(obj) {
+  var arr = [];
+  arr.push({
+    name: "MAIN",
+    value: "MAIN"
+  });
+  obj.data.children.forEach(function(element) {
+
+    var listobj = {
+      name: (element.data.display_name),
+      value: (element.data.display_name)
+    };
+    arr.push(listobj);
+    //arr.push(new inquirer.Separator());
+  });
+
+  return (arr);
+
+}
+
+
+function getComments(subreddit, id, callback) {
+
+  var commentsURL = "https://www.reddit.com/r/" + subreddit + "/comments/" + id + ".json";
+
+  request(commentsURL, function(err, result) {
+    callback(JSON.parse(result.body));
+  });
+  
+  //callback(commentsURL);
+}
+
+function displayComments (obj) {
+  console.log(obj.data.children[1].data.children[0].data.kind);
+}
+
+
+
 // Export the API
 module.exports = {
   // ...
@@ -70,7 +153,13 @@ module.exports = {
   getSortedHomepage: getSortedHomepage,
   getSubreddit: getSubreddit,
   getSortedSubreddit: getSortedSubreddit,
-  getSubreddits: getSubreddits
+  getSubreddits: getSubreddits,
+  dispImage: dispImage,
+  dispPostDetails: dispPostDetails,
+  displaySubredditList: displaySubredditList,
+  subredditMenuChoices: subredditMenuChoices,
+  getComments: getComments
+    //mainMenuOptions : mainMenuOptions
 
 };
 
@@ -199,7 +288,7 @@ function betterLog(value) {
 
 // function postList(obj) {
 
-  
+
 //   var arr = [];
 //   obj.data.children.forEach(function(element, i) {
 //       var listPosts = {
@@ -230,7 +319,7 @@ function betterLog(value) {
 
 
 // function comments (subreddit, id) {
-  
+
 //   var commentsURL;
 //   commentsURL = "https://www.reddit.com/r/"+subreddit+"/comments/"+id+".json";
 //   return commentsURL;
@@ -249,7 +338,7 @@ function betterLog(value) {
 //   });
 // }
 // function dispDetails (choicePost) {
-  
+
 //   console.log("\33c");
 //     //console.log("post choice: " + choice.menu);
 
@@ -259,8 +348,8 @@ function betterLog(value) {
 //     console.log("URL: " + choicePost.data.children[choicePost.menu].data.url)
 //     console.log("Username: " + choicePost.data.children[choicePost.menu].data.author);
 //     console.log("subreddit: " + choicePost.data.children[choicePost.menu].data.subreddit);
-    
-    
+
+
 
 
 // }
@@ -279,10 +368,8 @@ function betterLog(value) {
 //       }, (err, converted) => {
 //         console.log(err || converted);
 //       });
-      
+
 //     // console.log(obj.data.children[choicePost.menu].data.subreddit,obj.data.children[choicePost.menu].data.id);
-      
+
 //   // }
 // }
-
-
