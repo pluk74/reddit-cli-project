@@ -1,10 +1,13 @@
 var request = require('request');
+const imageToAscii = require("image-to-ascii");
+var wrap = require('word-wrap');
 
 /*
 This function should "return" the default homepage posts as an array of objects
 */
 function getHomepage(callback) {
   // Load reddit.com/.json and call back with the array of posts
+  //console.log("getHomepage called");
   request("https://www.reddit.com/.json", function(err, result) {
     callback(JSON.parse(result.body));
   });
@@ -54,6 +57,7 @@ function getSubreddits(callback) {
   // Load reddit.com/subreddits.json and call back with an array of subreddits
   //https://www.reddit.com/subreddits.json
   request("https://www.reddit.com/subreddits.json", function(err, result) {
+    //console.log(JSON.parse(result.body))
     callback(JSON.parse(result.body));
   });
 
@@ -83,81 +87,202 @@ function betterLog(value) {
 
 */
 
-var inquirer = require('inquirer');
+// var inquirer = require('inquirer');
 
-function main() {
-  function mainMenu() {
-    var menuChoices = [{
-      name: 'Show homepage',
-      value: 'HOMEPAGE'
-    }, {
-      name: 'Show subreddit',
-      value: 'SUBREDDIT'
-    }, {
-      name: 'List subreddits',
-      value: 'SUBREDDITS'
-    }];
-    return menuChoices
-  }
-
-  inquirer.prompt({
-    type: 'list',
-    name: 'menu',
-    message: 'What do you want to do?',
-    choices: mainMenu()
-  }).then(function(choice) {
-    switch (choice.menu) {
-      case "HOMEPAGE":
-        getHomepage(viewObject);
-        main();
-        //break;
-      case "SUBREDDIT":
-        // code block
-        break;
-      case "SUBREDDITS":
-        getSubreddits(displaySubredditList);
-
-      default:
-        // default code block
-    }
-  })
-
-// function callbackTester (callback) { 
-//     callback(); 
-// } 
-}
+// function main() {
 
 
+//   function mainMenu() {
+//     var menuChoices = [{
+//         name: 'Show homepage',
+//         value: 'HOMEPAGE'
+//       }, {
+//         name: 'Show subreddit',
+//         value: 'SUBREDDIT'
+//       }, {
+//         name: 'List subreddits',
+//         value: 'SUBREDDITS'
+//       }, {
+//         name: 'EXIT',
+//         value: 'EXIT'
+//       }
+
+//     ];
+//     return menuChoices
+//   }
+
+//   inquirer.prompt({
+//     type: 'list',
+//     name: 'menu',
+//     message: 'What do you want to do?',
+//     choices: mainMenu()
+//   }).then(function(choice) {
+//     switch (choice.menu) {
+//       case "HOMEPAGE":
+//         getHomepage(function(result) {
+//           //dispImage(result);
+//           postList(result);
+//           //main();
+//           });
+//         //main();
+//         break;
+//       case "SUBREDDIT":
+//         getSubreddits(function(res) {
+//           inquirer.prompt({
+//             type: 'list',
+//             name: 'menu',
+//             message: "Choose a subreddit",
+//             choices: subredditMenu(res)
+//           }).then(function(choiceSub) {
+//             //console.log(choice.menu);
+//             if (choice.menu !== "MAIN") {
+//               getSubreddit(choiceSub.menu, postList);
+//             }
+
+//             //main();
+//           })
+//         });
+
+//         break;
 
 
-main();
+//       case "SUBREDDITS":
+//         getSubreddits(displaySubredditList);
+//         main();
+//       case "EXIT":
+//         return;
+//       default:
+//         // default code block
+//     }
+//   })
 
-// function tryMe (param1, param2) { 
-//     alert (param1 + " and " + param2); 
-// } 
-function displaySubredditList(obj) {
-  //console.log(obj.data.children[1].data.display_name);
-  //var arr = [];
+
+
+//   function subredditMenu(obj) {
+//     var arr = [];
+//     arr.push({
+//       name: "MAIN",
+//       value: "MAIN"
+//     });
+//     obj.data.children.forEach(function(element) {
+
+//       var listobj = {
+//         name: (element.data.display_name),
+//         value: (element.data.display_name)
+//       };
+//       arr.push(listobj);
+//       //arr.push(new inquirer.Separator());
+//     });
+
+//     return (arr);
+
+//   }
+
+//   // function callbackTester (callback) { 
+//   //     callback(); 
+//   // } 
+// }
+
+// main();
+
+
+
+
+// function displaySubredditList(obj) {
+//   //console.log(obj.data.children[1].data.display_name);
+//   //var arr = [];
+
+//   obj.data.children.forEach(function(element) {
+//     console.log(element.data.display_name);
+//   });
+// }
+
+// function postList(obj) {
+
   
-  obj.data.children.forEach(function(element) {
-  console.log(element.data.display_name);
-});
-}
+//   var arr = [];
+//   obj.data.children.forEach(function(element, i) {
+//       var listPosts = {
+
+//         name: element.data.title + " | " + element.data.url + " | " + element.data.author + " | ",
+//         value: i
+//       }
+//       arr.push(listPosts);
+//       arr.push(new inquirer.Separator());
+//     }
+
+//   );
+
+//   inquirer.prompt({
+//     type: 'list',
+//     name: 'menu',
+//     message: 'Choose a post',
+//     choices: arr
+//   }).then(function(choicePost) {
+//       dispImage(choicePost);
+//       //dispDetails(choicePost);
+//       //main();
+
+//   }); 
+//   //return arr;
+// }
 
 
-function viewObject(obj) {
+
+// function comments (subreddit, id) {
   
-}
-
+//   var commentsURL;
+//   commentsURL = "https://www.reddit.com/r/"+subreddit+"/comments/"+id+".json";
+//   return commentsURL;
+// }
 
 // function viewObject(obj) {
-//   displayData(obj);
+
+
+//   obj.data.children.forEach(function(element) {
+
+//     console.log("Title: " + element.data.title);
+//     console.log("URL: " + element.data.url)
+//     console.log("Username: " + element.data.author);
+//     console.log("subreddit: " + element.data.subreddit);
+
+//   });
+// }
+// function dispDetails (choicePost) {
+  
+//   console.log("\33c");
+//     //console.log("post choice: " + choice.menu);
+
+//     console.log("Time!");
+//     console.log(choicePost.data.children[choicePost.menu].data.title);
+//     console.log("Title: " + choicePost.data.children[choicePost.menu].data.title);
+//     console.log("URL: " + choicePost.data.children[choicePost.menu].data.url)
+//     console.log("Username: " + choicePost.data.children[choicePost.menu].data.author);
+//     console.log("subreddit: " + choicePost.data.children[choicePost.menu].data.subreddit);
+    
+    
+
+
+// }
+
+// function dispImage (choicePost) {
+//   console.log("function dispImage");
+// // if (choicePost.data.children[choicePost.menu].data.thumbnail) //{
+//       imageToAscii(choicePost.data.children[choicePost.menu].data.thumbnail, {
+//         colored: true,
+//         bg : true,
+//         fg : true,
+//         size: {
+//           height: 30,
+//           width: 30
+//         }
+//       }, (err, converted) => {
+//         console.log(err || converted);
+//       });
+      
+//     // console.log(obj.data.children[choicePost.menu].data.subreddit,obj.data.children[choicePost.menu].data.id);
+      
+//   // }
 // }
 
 
-// function displayData(value) {
-//   console.log(require('util').inspect(value, {
-//     depth: 20,
-//     colors: true
-//   }));
-// }
